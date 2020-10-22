@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: register
+  profiles:
+    active: dev
+
+project:
+  version: @project.version@
+
+server:
+  port: 8080
+
+---
+spring:
+  profiles: dev
+  data:
+    mongodb:
+      host: ${MONGO_HOST}
+      port: 27017
+      username: ${USERNAME}
+      password: ${PASSWORD}
+      databse: ${DATABASE}

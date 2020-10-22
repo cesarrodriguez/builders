@@ -1,0 +1,26 @@
+version: '3.1'
+services:
+  builders:
+    container_name: register
+    image: builders
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - MONGO_HOST=mongodb
+      - USERNAME=test-user
+      - PASSWORD=test-password
+      - DATABASE=register
+
+  mongo:
+    container_name: mongodb
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: register
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
