@@ -1,14 +1,17 @@
 package br.com.builders.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 public class Cliente {
-
+    @Id
     private String id;
     private String nome;
     private String cpf;
-    private LocalDate dataNascimento;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private Date dataNascimento;
 }
