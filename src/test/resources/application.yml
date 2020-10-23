@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: register
+  profiles:
+    active: dev
+
+project:
+  version: 1
+
+server:
+  port: 8080
+
+---
+spring:
+  profiles: dev
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      username: 1231554
+      password: 1215454
+      databse: 212315644
