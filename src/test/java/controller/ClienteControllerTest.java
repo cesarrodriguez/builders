@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -128,5 +129,14 @@ public class ClienteControllerTest {
                 .content(new ObjectMapper().writeValueAsString(cliente)))
                 .andDo(print())
                 .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    public void quandoDeletarUmCliente_EntaoRetornarOk() throws Exception {
+        doNothing().when(service).deleteCliente(any());
+        this.mockMvc.perform(delete("/clientes/1234564")
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 }

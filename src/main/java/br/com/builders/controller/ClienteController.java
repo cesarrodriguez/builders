@@ -83,4 +83,17 @@ public class ClienteController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(clientedb);
     }
+
+    @DeleteMapping(path = "{id}",  consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        log.info("Deletando o cliente : " + id + "...");
+        var cliente = new Cliente();
+        cliente.setId(id);
+        service.deleteCliente(cliente);
+        log.info("Deletou o cliente com id: " + id );
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .build();
+    }
 }
