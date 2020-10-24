@@ -5,6 +5,7 @@ import br.com.builders.domain.model.Cliente;
 import br.com.builders.domain.service.ClienteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,6 @@ public class ClienteController {
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(cliente.get());
-
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -95,5 +95,25 @@ public class ClienteController {
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .build();
+    }
+
+    @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Page<Cliente>> getClienteQuery(@RequestParam("cpf") String cpf,
+                                                         @RequestParam("nome") String nome,
+                                                         @RequestParam(value = "pagina", required = false, defaultValue = "0") int pagina,
+                                                         @RequestParam(value = "tamanho", required = false, defaultValue = "10") int tamanho) {
+        log.info("Buscando o cliente com cpf: " + cpf + " e nome " + nome + " ...");
+        var cliente = service.getClienteByCpfAndNome(cpf, nome, pagina, tamanho);
+        if (cliente == null) {
+            log.info("Não encontrou o cliente com cpf: " + cpf + " e nome " + nome + " ...");
+            return ResponseEntity
+                    .noContent()
+                    .build();
+        }
+        log.info("Encntrou o cliente com cpf: " + cpf + " e nome " + nome + " ...");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(cliente);
     }
 }
