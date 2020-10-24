@@ -52,7 +52,7 @@ public class ClienteControllerTest {
         this.mockMvc.perform(get("/clientes/1234564")
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -112,7 +112,7 @@ public class ClienteControllerTest {
         cliente.setId("1234564");
         cliente.setNome("Teste 3");
         cliente.setDataNascimento(new Date());
-
+        when(service.getClienteById("1234564")).thenReturn(Optional.of(cliente));
         when(service.upsertCliente(any())).thenReturn(cliente);
         this.mockMvc.perform(patch("/clientes/1234564")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
