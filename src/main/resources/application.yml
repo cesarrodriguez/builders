@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: register
+  profiles:
+    active: dev
+
+project:
+  version: @project.version@
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+---
+spring:
+  profiles: dev
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:27017/?authSource=${MONGO_DATABASE}&authMechanism=SCRAM-SHA-1
+      database: ${MONGO_DATABASE}
