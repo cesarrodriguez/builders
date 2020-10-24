@@ -1,4 +1,4 @@
-package controller;
+package br.com.builders.controller;
 
 import br.com.builders.domain.model.Cliente;
 import br.com.builders.domain.service.ClienteService;
@@ -8,12 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Date;
 
@@ -48,7 +52,7 @@ public class ClienteControllerTest {
         this.mockMvc.perform(get("/clientes/1234564")
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -108,7 +112,7 @@ public class ClienteControllerTest {
         cliente.setId("1234564");
         cliente.setNome("Teste 3");
         cliente.setDataNascimento(new Date());
-
+        when(service.getClienteById("1234564")).thenReturn(Optional.of(cliente));
         when(service.upsertCliente(any())).thenReturn(cliente);
         this.mockMvc.perform(patch("/clientes/1234564")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -138,5 +142,24 @@ public class ClienteControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andDo(print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void quandoBuscaUmClientePorCpfENome_EntaoRetornsOk() throws Exception {
+        var cliente = new Cliente();
+        cliente.setId("1234564");
+        cliente.setNome("Teste 1");
+        cliente.setCpf("111.111.111-11");
+        cliente.setDataNascimento(new Date());
+        List<Cliente> list = new ArrayList<>();
+        list.add(cliente);
+        Page<Cliente> page = new PageImpl<Cliente>(list);
+        when(service.getClienteByCpfAndNome(any(), any(), any(), any())).thenReturn(page);
+        this.mockMvc.perform(get("/clientes?cpf=111.111.111-11&nome=cesar")
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.content[0].nome").value("Teste 1"));
     }
 }

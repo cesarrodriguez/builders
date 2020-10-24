@@ -8,9 +8,9 @@ services:
       - 8080:8080
     environment:
       - MONGO_HOST=mongodb
-      - USERNAME=test-user
-      - PASSWORD=test-password
-      - DATABASE=register
+      - MONGO_USERNAME=test-user
+      - MONGO_PASSWORD=test-password
+      - MONGO_DATABASE=register
 
   mongo:
     container_name: mongodb

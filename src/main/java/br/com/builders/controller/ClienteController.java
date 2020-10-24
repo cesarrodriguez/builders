@@ -5,6 +5,7 @@ import br.com.builders.domain.model.Cliente;
 import br.com.builders.domain.service.ClienteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class ClienteController {
         if(cliente == null || !cliente.isPresent()){
             log.info("Não encontrou o cliente com id: " + id);
             return ResponseEntity
-                    .noContent()
+                    .notFound()
                     .build();
         }
         log.info("Encontrou o cliente com id: " + id );
@@ -33,7 +34,6 @@ public class ClienteController {
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(cliente.get());
-
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -63,28 +63,28 @@ public class ClienteController {
     @PatchMapping(path = "{id}",  consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Cliente> update(@RequestBody ClienteResource clienteResource, @PathVariable String id) {
         log.info("Atualizando o cliente : " + id + "...");
-        var cliente = new Cliente();
-        cliente.setId(id);
-        if(clienteResource.getNome() != null && !clienteResource.getNome().equals("")) {
-            cliente.setNome(clienteResource.getNome());
-        }
-        if(clienteResource.getDataNasciemnto() != null) {
-            cliente.setDataNascimento(clienteResource.getDataNasciemnto());
-        }
-        if(cliente.getNome() == null && cliente.getDataNascimento() == null){
+        var clientedb = service.getClienteById(id);
+
+        if(!clientedb.isPresent()
+                || (clientedb.get().getNome() == null && clientedb.get().getDataNascimento() == null)){
             return ResponseEntity
                     .status(HttpStatus.METHOD_NOT_ALLOWED)
                     .build();
         }
-        var clientedb = service.upsertCliente(cliente);
-        log.info("Atualizou o cliente com id: " + clientedb.getId() );
+        var cliente = clientedb.get();
+        cliente.setId(id);
+        cliente.setNome(clienteResource.getNome());
+        cliente.setDataNascimento(clienteResource.getDataNascimento());
+
+        var clienteAtualizado = service.upsertCliente(cliente);
+        log.info("Atualizou o cliente com id: " + clienteAtualizado.getId() );
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(clientedb);
+                .body(clienteAtualizado);
     }
 
-    @DeleteMapping(path = "{id}",  consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         log.info("Deletando o cliente : " + id + "...");
         var cliente = new Cliente();
@@ -95,5 +95,26 @@ public class ClienteController {
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .build();
+    }
+
+    @GetMapping()
+    public ResponseEntity<Page<Cliente>> getClienteQuery(@RequestParam("cpf") String cpf,
+                                                         @RequestParam("nome") String nome,
+                                                         @RequestParam(value = "pagina", required = false, defaultValue = "0") int pagina,
+                                                         @RequestParam(value = "tamanho", required = false, defaultValue = "10") int tamanho) {
+        log.info("Buscando o cliente com cpf: " + cpf + " e nome " + nome + " ...");
+        var cliente = service.getClienteByCpfAndNome(cpf, nome, pagina, tamanho);
+        if (cliente == null || cliente.getNumberOfElements() == 0) {
+            log.info("Não encontrou o cliente com cpf: " + cpf + " e nome " + nome + " ...");
+            return ResponseEntity
+                    .notFound()
+                    .build();
+        }
+        cliente.getContent().forEach(c -> c.addIdade());
+        log.info("Encntrou o cliente com cpf: " + cpf + " e nome " + nome + " ...");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(cliente);
     }
 }

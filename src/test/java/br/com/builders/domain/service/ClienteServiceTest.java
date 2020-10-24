@@ -9,9 +9,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
+import java.awt.print.Pageable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -88,4 +93,21 @@ public class ClienteServiceTest {
         Assert.assertNotEquals(cliente, clienteDb);
         Assert.assertNotEquals(cliente.getNome(), clienteDb.getNome());
     }
+
+    @Test
+    public void quantoBuscarUmClientePorCpfeNome_entaoRetornaUmCliente() {
+        var cliente = new Cliente();
+        cliente.setId("1234564");
+        cliente.setNome("Teste 1");
+        cliente.setCpf("111.111.111-11");
+        cliente.setDataNascimento(new Date());
+        List<Cliente> list = new ArrayList<>();
+        list.add(cliente);
+        Page<Cliente> page = new PageImpl<Cliente>(list);
+        when(repository.findByCpfAndNome(any(), any(), any())).thenReturn(page);
+        var clienteDb = service.getClienteByCpfAndNome("1234564", "Teste 1",0,10);
+        Assert.assertEquals(cliente, clienteDb.get().findFirst().get());
+        Assert.assertEquals(cliente.getDataNascimento(), clienteDb.get().findFirst().get().getDataNascimento());
+    }
+
 }
